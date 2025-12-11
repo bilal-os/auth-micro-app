@@ -1,0 +1,41 @@
+name: Build and Publish Docker Images
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # optional manual trigger
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    env:
+      REGISTRY: ghcr.io
+      OWNER: ${{ github.repository_owner }}
+
+    strategy:
+      matrix:
+        service: [email-service, api-gateway, auth-service, otp-service, resource-service]
+
+    steps:
+      # 1️⃣ Checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2️⃣ Login to GHCR
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 3️⃣ Build and push each service
+      - name: Build & Push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ github.workspace }}/${{ matrix.service }}
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/my-repo/${{ matrix.service }}:latest
+          file: ${{ github.workspace }}/${{ matrix.service }}/Dockerfile
