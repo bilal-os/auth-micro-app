@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        service: [email-service, api-gateway, auth-service, otp-service, resource-service]
+        service: [email-service, api-gateway, auth-service, otp-service]
 
     steps:
       # 1️⃣ Checkout repo
